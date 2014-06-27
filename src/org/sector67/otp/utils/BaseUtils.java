@@ -33,7 +33,7 @@ public class BaseUtils {
 	private static String HEADER="------START DATA-----";
 	private static String FOOTER="------END DATA-----";
 	private static int MAJOR_CHUNK_SIZE=40;
-	private static int MINOR_CHUNK_SIZE=4;
+	private static int MINOR_CHUNK_SIZE=2;
 	private static String MINOR_CHUNK_SEPARATOR=" ";
 	private static String MAJOR_CHUNK_SEPARATOR="\n";
 
@@ -102,7 +102,8 @@ public class BaseUtils {
 	}
 
 	public static String bytesToBase16(byte[] input) {
-		String result = Hex.encodeHexString(input);
+		char[] hex = Hex.encodeHex(input);
+		String result = new String(hex);
 		return result.toUpperCase();
 	}
 	
