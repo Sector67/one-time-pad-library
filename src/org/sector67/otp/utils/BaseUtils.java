@@ -34,7 +34,7 @@ public class BaseUtils {
 	private static String FOOTER="------END DATA-----";
 	private static int MAJOR_CHUNK_SIZE=40;
 	private static int MINOR_CHUNK_SIZE=2;
-	private static String MINOR_CHUNK_SEPARATOR=" ";
+	private static String MINOR_CHUNK_SEPARATOR="  ";
 	private static String MAJOR_CHUNK_SEPARATOR="\n";
 
 	public static String bytesToBase64(byte[] input) {
