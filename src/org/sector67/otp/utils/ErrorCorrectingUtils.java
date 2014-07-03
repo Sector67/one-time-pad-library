@@ -31,6 +31,8 @@ import com.google.zxing.common.reedsolomon.ReedSolomonException;
  */
 
 public class ErrorCorrectingUtils {
+	/*
+	 * moved all of this to the ErrorCorrectingBase16EncoderImplementation
 	private static int ERROR_CORRECTION_BYTES = 8;
 	private static GenericGF DEFAULT_GF = GenericGF.QR_CODE_FIELD_256;
 	private static int MAX_BYTES=256;
@@ -76,4 +78,5 @@ public class ErrorCorrectingUtils {
 		}
 		return result;
 	}
+	*/
 }

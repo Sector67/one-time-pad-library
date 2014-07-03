@@ -101,44 +101,5 @@ public class BaseUtils {
 	    return result.toString();
 	}
 
-	public static String bytesToBase16(byte[] input) {
-		char[] hex = Hex.encodeHex(input);
-		String result = new String(hex);
-		return result.toUpperCase();
-	}
-	
-	/*
-	 * given an input String of hex characters, return a byte[] representing the same data 
-	 */
-	public static byte[] base16ToBytes(String input) {
-		byte[] result = null;
-		input  = input.replaceAll("[" + MINOR_CHUNK_SEPARATOR + MAJOR_CHUNK_SEPARATOR + "]","");
-		try {
-			result =  Hex.decodeHex(input.toCharArray());
-		} catch (DecoderException e) {
-			throw new IllegalArgumentException("The provided input is not valid base16.", e);
-		}
-		return result;
-	}
 
-	/*
-	 * Chunks the byte[] data into base64 chunks of the configured length.
-	 */
-	public static String getChunkedBase16(byte[] data) {
-		String base16 = bytesToBase16(data);
-	    StringBuffer result = new StringBuffer();
-	    int ilength = base16.length();
-	    for (int i = 0; i < ilength; i += MAJOR_CHUNK_SIZE) {
-	    	String line = base16.substring(i, Math.min(ilength, i + MAJOR_CHUNK_SIZE));
-	    	int jlength = line.length();
-	    	for (int j = 0; j < jlength; j += MINOR_CHUNK_SIZE) {
-	            result.append(line.substring(j, Math.min(jlength, j + MINOR_CHUNK_SIZE)));
-	            if (j + MINOR_CHUNK_SIZE < jlength) {
-	            	result.append(MINOR_CHUNK_SEPARATOR);
-	            }
-	    	}
-	        result.append(MAJOR_CHUNK_SEPARATOR);
-	    }
-	    return result.toString();
-	}
 }
