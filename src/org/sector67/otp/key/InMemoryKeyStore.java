@@ -35,6 +35,11 @@ public class InMemoryKeyStore implements TestableKeyStore {
 	private Map<String, Integer> offsets = new HashMap<String, Integer>();
 	private Map<String, byte[]> keys = new HashMap<String, byte[]>(); 
 	Random r = new SecureRandom();
+	private KeyEraser eraser = new MultiPassSecureRandomEraser();
+	
+	public void setKeyEraser(KeyEraser eraser) {
+		this.eraser = eraser;
+	}
 
 	public void generateKey(String name, int length) {
 		if (name == null) {
@@ -64,8 +69,7 @@ public class InMemoryKeyStore implements TestableKeyStore {
 	}
 	
 	/*
-	 * Provides the next bytes from the key and replaces those bytes with random information
-	 * updates the current index of the key
+	 * Provides the next bytes from the key and erases the data using the provided KeyEraser
 	 */
 	@Override
 	public byte[] nextBytes(String name, int length) throws KeyException {
@@ -83,10 +87,10 @@ public class InMemoryKeyStore implements TestableKeyStore {
 		byte[] result = new byte[length];
 		for (int i = 0; i < length; i++) {
 			result[i] = key[currentOffset + i];
-			byte[] random = new byte[1];
-			r.nextBytes(random);
-			key[currentOffset + i] = random[0];
 		}
+		//clear the data
+		clear(name, currentOffset, length);
+		//update the offset
 		offsets.put(name, currentOffset + length);
 		return result;
 	}
@@ -101,6 +105,39 @@ public class InMemoryKeyStore implements TestableKeyStore {
 		int offset = offsets.get(source);
 		offsets.put(destination, offset);
 		keys.put(destination, copy);
+	}
+	
+	private void clear(String keyName, int pos, int length) throws KeyException {
+		byte[] key = keys.get(keyName);
+		KeyData kd = new InMemoryKeyData(key);
+		eraser.erase(kd, pos, length);
+	}
+	
+	public class InMemoryKeyData implements KeyData {
+		private int position = 0;
+		private byte[] key;
+		
+		public InMemoryKeyData(byte[] key) {
+			this.key = key;
+			this.position = 0;
+		}
+
+		public void close() {
+			//no-op for in-memory
+		}
+
+		public void seek(int position) throws KeyException {
+			this.position = position;
+			
+		}
+
+		public void write(byte[] data) throws KeyException {
+			//System.out.println("data length: " + data.length + " position: " + position); 
+			for (int i = 0; i < data.length; i++) {
+				key[position + i] = data[position];
+			}
+		}
+		
 	}
 
 }

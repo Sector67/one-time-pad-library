@@ -19,11 +19,10 @@
 package org.sector67.otp.key;
 
 /**
- * This interface defines the required methods of an OTP keystore.
  * 
  * @author scott.hasse@gmail.com
+ *
  */
-public interface KeyStore {
-	public byte[] nextBytes(String name, int length) throws KeyException;
-	public void setKeyEraser(KeyEraser eraser);
+public interface KeyEraser {
+	public void erase(KeyData d, int offset, int length) throws KeyException;
 }

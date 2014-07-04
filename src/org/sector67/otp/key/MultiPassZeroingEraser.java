@@ -18,12 +18,25 @@
 
 package org.sector67.otp.key;
 
+import java.util.Arrays;
+
 /**
- * This interface defines the required methods of an OTP keystore.
  * 
  * @author scott.hasse@gmail.com
+ *
  */
-public interface KeyStore {
-	public byte[] nextBytes(String name, int length) throws KeyException;
-	public void setKeyEraser(KeyEraser eraser);
+public class MultiPassZeroingEraser implements KeyEraser {
+	
+	private int passes = 3;
+	private byte fill = (byte) 0x00;
+
+	public void erase(KeyData d, int offset, int length) throws KeyException {
+		byte[] data = new byte[length];
+		Arrays.fill(data, fill);
+		for(int i = 0; i < passes; i++) {
+			d.seek(offset);
+			d.write(data);
+		}
+	}	
+
 }

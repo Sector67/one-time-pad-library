@@ -15,15 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>. 
  */
-
 package org.sector67.otp.key;
 
 /**
- * This interface defines the required methods of an OTP keystore.
+ * An interface to facilitate erasing key data using different pluggable strategies.
+ * Intentionally designed to only allow writing, not reading, key data.
  * 
  * @author scott.hasse@gmail.com
+ *
  */
-public interface KeyStore {
-	public byte[] nextBytes(String name, int length) throws KeyException;
-	public void setKeyEraser(KeyEraser eraser);
+public interface KeyData {
+	public void seek(int position) throws KeyException;
+	public void write(byte[] data) throws KeyException;
+	public void close() throws KeyException;
 }

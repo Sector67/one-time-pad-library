@@ -20,6 +20,7 @@ package org.sector67.otp.key;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,11 +33,12 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
+import org.sector67.otp.key.InMemoryKeyStore.InMemoryKeyData;
 import org.sector67.otp.utils.FileUtils;
 
 /**
  * A file-based implementation of an OTP keystore, primarily for testing
- * purposes
+ * purposes.  Uses a properties file to store the key offsets.
  * 
  * @author scott.hasse@gmail.com
  * 
@@ -47,6 +49,8 @@ public class FileKeyStore implements TestableKeyStore {
 	String keyDirectory;
 	Random r = new SecureRandom();
 
+	private KeyEraser eraser = new MultiPassSecureRandomEraser();
+	
 	public FileKeyStore(String keyDirectory) {
 		this.keyDirectory = keyDirectory;
 		File keyDir = new File(keyDirectory);
@@ -61,6 +65,10 @@ public class FileKeyStore implements TestableKeyStore {
 			Properties p = new Properties();
 			writeOffsetFile(p);
 		}
+	}
+
+	public void setKeyEraser(KeyEraser eraser) {
+		this.eraser = eraser;
 	}
 
 	/*
@@ -88,6 +96,7 @@ public class FileKeyStore implements TestableKeyStore {
 			}
 			file.seek(offset);
 			file.read(key);
+			clear(name, offset, length);
 		} catch (IOException e) {
 			throw new KeyException(e);
 		}
@@ -169,6 +178,7 @@ public class FileKeyStore implements TestableKeyStore {
 	 * and attempts to delete the keystore directory
 	 */
 	public void destroy() throws KeyException {
+		//TODO: make this use the KeyEraser to clear data before deleting
 		Properties p = readOffsetFile();
 		Set<String> names = p.stringPropertyNames();
 		for (String name : names) {
@@ -203,6 +213,53 @@ public class FileKeyStore implements TestableKeyStore {
 			throw new KeyException(e);
 		}
 		return props;
+	}
+	
+	private void clear(String keyName, int pos, int length) throws KeyException {
+		RandomAccessFile key;
+		try {
+			key = new RandomAccessFile(keyDirectory
+					+ File.pathSeparator + keyName, "rw");
+			KeyData kd = new FileKeyData(key);
+			eraser.erase(kd, pos, length);
+		} catch (FileNotFoundException e) {
+			throw new KeyException(e);
+		}
+
+	}
+	
+	public class FileKeyData implements KeyData {
+		private RandomAccessFile key;
+		
+		public FileKeyData(RandomAccessFile key) {
+			this.key = key;
+		}
+
+		public void close() throws KeyException {
+			try {
+				key.close();
+			} catch (IOException e) {
+				throw new KeyException(e);
+			}
+		}
+
+		public void seek(int position) throws KeyException {
+			try {
+				key.seek(position);
+			} catch (IOException e) {
+				throw new KeyException(e);
+			}
+			
+		}
+
+		public void write(byte[] data) throws KeyException {
+			try {
+				key.write(data);
+			} catch (IOException e) {
+				throw new KeyException(e);
+			}
+		}
+		
 	}
 
 }

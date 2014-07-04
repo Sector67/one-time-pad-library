@@ -18,12 +18,27 @@
 
 package org.sector67.otp.key;
 
+import java.security.SecureRandom;
+import java.util.Random;
+
 /**
- * This interface defines the required methods of an OTP keystore.
  * 
  * @author scott.hasse@gmail.com
+ *
  */
-public interface KeyStore {
-	public byte[] nextBytes(String name, int length) throws KeyException;
-	public void setKeyEraser(KeyEraser eraser);
+public class MultiPassSecureRandomEraser implements KeyEraser {
+	
+	private int passes = 3;
+	private byte fill = (byte) 0x00;
+	Random r = new SecureRandom();
+
+	public void erase(KeyData d, int offset, int length) throws KeyException {
+		byte[] data = new byte[length];
+		for(int i = 0; i < passes; i++) {
+			r.nextBytes(data);
+			d.seek(offset);
+			d.write(data);
+		}
+	}	
+
 }
