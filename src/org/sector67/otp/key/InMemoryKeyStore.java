@@ -40,6 +40,12 @@ public class InMemoryKeyStore implements TestableKeyStore {
 	Random r = new SecureRandom();
 	private KeyEraser eraser = new MultiPassSecureRandomEraser();
 	
+	@Override
+	public void init() {
+		
+	}
+
+	@Override
 	public void setKeyEraser(KeyEraser eraser) {
 		this.eraser = eraser;
 	}

@@ -30,4 +30,5 @@ public interface KeyStore {
 	public void setKeyEraser(KeyEraser eraser);
 	public void deleteKey(String name) throws KeyException;
 	public List<String> listKeys() throws KeyException;
+	public void init() throws KeyException;
 }

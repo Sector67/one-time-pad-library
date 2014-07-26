@@ -54,11 +54,24 @@ public class FileKeyStore implements TestableKeyStore {
 	
 	public FileKeyStore(String keyDirectory) {
 		this.keyDirectory = keyDirectory;
+	}
+	
+	@Override
+	public void init() throws KeyException {
 		File keyDir = new File(keyDirectory);
-		if (!keyDir.exists() || !keyDir.isDirectory()) {
-			throw new IllegalArgumentException(
-					"The configured key directory does not exist or is not a directory: "
+		if (!keyDir.exists()) {
+			boolean result = keyDir.mkdirs();
+			if (result == false) {
+				throw new KeyException (
+					"The configured key directory does not exist, and could not be created: "
 							+ keyDirectory);
+			}
+
+		}
+		if (!keyDir.isDirectory()) {
+			throw new KeyException(
+					"The configured key directory is not a directory: "
+							+ keyDirectory);			
 		}
 		File offsetFile = new File(keyDirectory + File.separator
 				+ OFFSET_FILE_NAME);
@@ -68,6 +81,7 @@ public class FileKeyStore implements TestableKeyStore {
 		}
 	}
 
+	@Override
 	public void setKeyEraser(KeyEraser eraser) {
 		this.eraser = eraser;
 	}
