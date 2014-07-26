@@ -29,7 +29,6 @@ import java.util.Random;
 public class MultiPassSecureRandomEraser implements KeyEraser {
 	
 	private int passes = 3;
-	private byte fill = (byte) 0x00;
 	Random r = new SecureRandom();
 
 	public void erase(KeyData d, int offset, int length) throws KeyException {

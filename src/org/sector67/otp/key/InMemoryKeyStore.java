@@ -19,8 +19,11 @@
 package org.sector67.otp.key;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -136,6 +139,25 @@ public class InMemoryKeyStore implements TestableKeyStore {
 			for (int i = 0; i < data.length; i++) {
 				key[position + i] = data[position];
 			}
+		}
+		
+	}
+
+	@Override
+	public List<String> listKeys() {
+		List<String> result = new ArrayList<String>();
+		result.addAll(keys.keySet());
+		Collections.sort(result);
+		return result;
+	}
+	
+	@Override
+	public void deleteKey(String name) {
+		if (offsets.containsKey(name)) {
+			offsets.remove(name);
+		}
+		if (keys.containsKey(name)) {
+			keys.remove(name);
 		}
 		
 	}

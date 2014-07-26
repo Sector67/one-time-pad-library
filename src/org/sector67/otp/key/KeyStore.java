@@ -18,6 +18,8 @@
 
 package org.sector67.otp.key;
 
+import java.util.List;
+
 /**
  * This interface defines the required methods of an OTP keystore.
  * 
@@ -26,4 +28,6 @@ package org.sector67.otp.key;
 public interface KeyStore {
 	public byte[] nextBytes(String name, int length) throws KeyException;
 	public void setKeyEraser(KeyEraser eraser);
+	public void deleteKey(String name) throws KeyException;
+	public List<String> listKeys() throws KeyException;
 }

@@ -26,14 +26,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
-import org.sector67.otp.key.InMemoryKeyStore.InMemoryKeyData;
 import org.sector67.otp.utils.FileUtils;
 
 /**
@@ -59,7 +60,7 @@ public class FileKeyStore implements TestableKeyStore {
 					"The configured key directory does not exist or is not a directory: "
 							+ keyDirectory);
 		}
-		File offsetFile = new File(keyDirectory + File.pathSeparator
+		File offsetFile = new File(keyDirectory + File.separator
 				+ OFFSET_FILE_NAME);
 		if (!offsetFile.exists()) {
 			Properties p = new Properties();
@@ -89,7 +90,7 @@ public class FileKeyStore implements TestableKeyStore {
 		int offset = Integer.parseInt(p.getProperty(name));
 		byte[] key = new byte[length];
 		try (RandomAccessFile file = new RandomAccessFile(keyDirectory
-				+ File.pathSeparator + name, "r");) {
+				+ File.separator + name, "r");) {
 			if (file.length() < offset + length) {
 				throw new KeyException(
 						"The key is not long enough to provide the requested bytes");
@@ -115,10 +116,10 @@ public class FileKeyStore implements TestableKeyStore {
 
 	@Override
 	public void copyKey(String source, String destination) throws KeyException {
-		File input = new File(keyDirectory + File.pathSeparator + source);
-		File output = new File(keyDirectory + File.pathSeparator + destination);
+		File input = new File(keyDirectory + File.separator + source);
+		File output = new File(keyDirectory + File.separator + destination);
 		try {
-			Files.copy(input.toPath(), output.toPath(), new CopyOption[0]);
+			copy(input, output);
 		} catch (IOException e) {
 			throw new KeyException(e);
 		}
@@ -141,7 +142,7 @@ public class FileKeyStore implements TestableKeyStore {
 					"You cannot create a key that already exists: " + name);
 		}
 		try {
-			FileUtils.write(key, keyDirectory + File.pathSeparator + name);
+			FileUtils.write(key, keyDirectory + File.separator + name);
 		} catch (IOException e) {
 			throw new KeyException(e);
 		}
@@ -150,6 +151,29 @@ public class FileKeyStore implements TestableKeyStore {
 		writeOffsetFile(p);
 	}
 
+	@Override
+	public void deleteKey(String name) throws KeyException {
+		Properties p = readOffsetFile();
+		if (p.containsKey(name)) {
+			FileUtils.deleteFile(keyDirectory + File.separator + name);
+			p.remove(name);
+			writeOffsetFile(p);
+		}		
+	}
+
+	@Override
+	public List<String> listKeys() throws KeyException {
+		Properties p = readOffsetFile();
+		List<String> result = new ArrayList<String>();
+		Set<Object> keys = p.keySet();
+		for (Iterator<Object> iterator = keys.iterator(); iterator.hasNext();) {
+			String keyName = (String) iterator.next();
+			result.add(keyName);			
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
 	@Override
 	public void generateKey(String name, int length) throws KeyException {
 		if (name == null) {
@@ -164,7 +188,7 @@ public class FileKeyStore implements TestableKeyStore {
 		byte[] b = new byte[length];
 		r.nextBytes(b);
 		try {
-			FileUtils.write(b, keyDirectory + File.pathSeparator + name);
+			FileUtils.write(b, keyDirectory + File.separator + name);
 		} catch (IOException e) {
 			throw new KeyException(e);
 		}
@@ -182,16 +206,16 @@ public class FileKeyStore implements TestableKeyStore {
 		Properties p = readOffsetFile();
 		Set<String> names = p.stringPropertyNames();
 		for (String name : names) {
-			FileUtils.deleteFile(keyDirectory + File.pathSeparator + name);
+			FileUtils.deleteFile(keyDirectory + File.separator + name);
 		}
-		FileUtils.deleteFile(keyDirectory + File.pathSeparator
+		FileUtils.deleteFile(keyDirectory + File.separator
 				+ OFFSET_FILE_NAME);
 		FileUtils.deleteFile(keyDirectory);
 	}
 
 	private void writeOffsetFile(Properties props) {
 		try {
-			File offsetFile = new File(keyDirectory + File.pathSeparator
+			File offsetFile = new File(keyDirectory + File.separator
 					+ OFFSET_FILE_NAME);
 			OutputStream out = new FileOutputStream(offsetFile);
 			props.store(out, "A property file storing the key offsets");
@@ -204,7 +228,7 @@ public class FileKeyStore implements TestableKeyStore {
 		Properties props = new Properties();
 		InputStream is = null;
 		try {
-			File offsetFile = new File(keyDirectory + File.pathSeparator
+			File offsetFile = new File(keyDirectory + File.separator
 					+ OFFSET_FILE_NAME);
 			is = new FileInputStream(offsetFile);
 			props.load(is);
@@ -219,7 +243,7 @@ public class FileKeyStore implements TestableKeyStore {
 		RandomAccessFile key;
 		try {
 			key = new RandomAccessFile(keyDirectory
-					+ File.pathSeparator + keyName, "rw");
+					+ File.separator + keyName, "rw");
 			KeyData kd = new FileKeyData(key);
 			eraser.erase(kd, pos, length);
 		} catch (FileNotFoundException e) {
@@ -260,6 +284,20 @@ public class FileKeyStore implements TestableKeyStore {
 			}
 		}
 		
+	}
+	
+	private void copy(File src, File dst) throws IOException {
+	    InputStream in = new FileInputStream(src);
+	    OutputStream out = new FileOutputStream(dst);
+
+	    // Transfer bytes from in to out
+	    byte[] buf = new byte[1024];
+	    int len;
+	    while ((len = in.read(buf)) > 0) {
+	        out.write(buf, 0, len);
+	    }
+	    in.close();
+	    out.close();
 	}
 
 }

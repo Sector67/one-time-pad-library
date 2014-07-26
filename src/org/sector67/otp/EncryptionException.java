@@ -1,4 +1,3 @@
-package org.sector67.otp;
 /*
  * Copyright 2014 individual contributors as indicated by the @author 
  * tags
@@ -16,9 +15,7 @@ package org.sector67.otp;
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>. 
  */
-
-
-
+package org.sector67.otp;
 
 public class EncryptionException extends Exception {
 
