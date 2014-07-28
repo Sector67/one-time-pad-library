@@ -28,8 +28,6 @@ import java.util.Set;
  */
 public interface TestableKeyStore extends KeyStore {
 
-	public void generateKey(String name, int length) throws KeyException;
-	public void addKey(String name, byte[] key, int offset) throws KeyException;
 	public Set<String> getKeyNames() throws KeyException;
 	public void copyKey(String source, String destination) throws KeyException;
 }

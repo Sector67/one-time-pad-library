@@ -63,8 +63,8 @@ public class FileKeyStore implements TestableKeyStore {
 			boolean result = keyDir.mkdirs();
 			if (result == false) {
 				throw new KeyException (
-					"The configured key directory does not exist, and could not be created: "
-							+ keyDirectory);
+					"The configured key directory does not exist, and could not be created: ["
+							+ keyDirectory + "]");
 			}
 
 		}
@@ -169,6 +169,7 @@ public class FileKeyStore implements TestableKeyStore {
 	public void deleteKey(String name) throws KeyException {
 		Properties p = readOffsetFile();
 		if (p.containsKey(name)) {
+			//TODO: wipe file using the appropriate strategy
 			FileUtils.deleteFile(keyDirectory + File.separator + name);
 			p.remove(name);
 			writeOffsetFile(p);

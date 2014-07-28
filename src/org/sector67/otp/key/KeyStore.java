@@ -31,4 +31,8 @@ public interface KeyStore {
 	public void deleteKey(String name) throws KeyException;
 	public List<String> listKeys() throws KeyException;
 	public void init() throws KeyException;
+	public void generateKey(String name, int length) throws KeyException;
+	public void addKey(String name, byte[] key, int offset) throws KeyException;
+	public void copyKey(String source, String destination) throws KeyException;
+
 }
