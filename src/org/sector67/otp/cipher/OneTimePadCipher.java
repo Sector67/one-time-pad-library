@@ -68,7 +68,7 @@ public class OneTimePadCipher {
 			throw new CipherException(e);
 		}
 		//get the appropriate key
-		byte[] key = store.nextBytes(keyname, inputBytes.length);
+		byte[] key = store.getKeyBytesForEncryption(keyname, inputBytes.length);
 		byte[] encrypted = encrypt(inputBytes, key);
 		return encrypted;
 	}
@@ -76,10 +76,10 @@ public class OneTimePadCipher {
 	/*
 	 * Decrypts the provided bytes into a Java String given the name of a key.  Assumes the data UTF-8 bytes. 
 	 */
-	public String decrypt(String keyname, byte[] input) throws KeyException, CipherException {
+	public String decrypt(String keyname, int offset, byte[] input) throws KeyException, CipherException {
 		//decrypt
 		//get the appropriate key data
-		byte[] key = store.nextBytes(keyname, input.length);
+		byte[] key = store.getKeyBytesForDecryption(keyname, offset, input.length);
 		byte[] decrypted = decrypt(input, key);
 		//interpret the result as UTF-8 bytes 
 		String result = null;

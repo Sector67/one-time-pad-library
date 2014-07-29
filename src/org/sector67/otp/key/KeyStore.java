@@ -26,7 +26,14 @@ import java.util.List;
  * @author scott.hasse@gmail.com
  */
 public interface KeyStore {
-	public byte[] nextBytes(String name, int length) throws KeyException;
+	/**
+	 * This method is used when obtaining key bytes for encryption
+	 * @param name
+	 * @param length
+	 * @return
+	 * @throws KeyException
+	 */
+	public byte[] getKeyBytesForEncryption(String keyName, int length) throws KeyException;
 	public void setKeyEraser(KeyEraser eraser);
 	public void deleteKey(String name) throws KeyException;
 	public List<String> listKeys() throws KeyException;
@@ -34,5 +41,15 @@ public interface KeyStore {
 	public void generateKey(String name, int length) throws KeyException;
 	public void addKey(String name, byte[] key, int offset) throws KeyException;
 	public void copyKey(String source, String destination) throws KeyException;
-
+	public int getCurrentOffset(String keyName) throws KeyException;
+	public int getSize(String keyName) throws KeyException;
+	
+	/**
+	 * This method is used when obtaining key bytes for decryption
+	 * @param name
+	 * @param offset
+	 * @param length
+	 * @return
+	 */
+	public byte[] getKeyBytesForDecryption(String name, int offset, int length) throws KeyException;
 }

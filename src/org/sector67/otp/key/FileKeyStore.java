@@ -91,7 +91,7 @@ public class FileKeyStore implements TestableKeyStore {
 	 * information updates the current index of the key
 	 */
 	@Override
-	public byte[] nextBytes(String name, int length) throws KeyException {
+	public byte[] getKeyBytesForEncryption(String name, int length) throws KeyException {
 		if (name == null) {
 			throw new KeyException("You cannot use a null key name.");
 		}
@@ -313,6 +313,57 @@ public class FileKeyStore implements TestableKeyStore {
 	    }
 	    in.close();
 	    out.close();
+	}
+
+	@Override
+	public int getCurrentOffset(String keyName) throws KeyException {
+		int offset = 0;
+		Properties p = readOffsetFile();
+		if (p.containsKey(keyName)) {
+			String offsetString = p.getProperty(keyName);
+			try {
+				offset = Integer.parseInt(offsetString); 
+			} catch (NumberFormatException e) {
+				throw new KeyException(e);
+			}
+		} else {
+			throw new KeyException("The key does not exist: [" + keyName + "]");
+		}
+		return offset;
+	}
+
+	@Override
+	public int getSize(String keyName) throws KeyException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public byte[] getKeyBytesForDecryption(String name, int offset, int length)
+			throws KeyException {
+		if (name == null) {
+			throw new KeyException("You cannot use a null key name.");
+		}
+		Properties p = readOffsetFile();
+		if (!p.containsKey(name)) {
+			throw new KeyException(
+					"The requested key does not exist in this key store: "
+							+ name);
+		}
+		byte[] key = new byte[length];
+		try (RandomAccessFile file = new RandomAccessFile(keyDirectory
+				+ File.separator + name, "r");) {
+			if (file.length() < offset + length) {
+				throw new KeyException(
+						"The key is not long enough to provide the requested bytes");
+			}
+			file.seek(offset);
+			file.read(key);
+			clear(name, offset, length);
+		} catch (IOException e) {
+			throw new KeyException(e);
+		}
+		return key;
 	}
 
 }

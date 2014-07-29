@@ -81,7 +81,7 @@ public class InMemoryKeyStore implements TestableKeyStore {
 	 * Provides the next bytes from the key and erases the data using the provided KeyEraser
 	 */
 	@Override
-	public byte[] nextBytes(String name, int length) throws KeyException {
+	public byte[] getKeyBytesForEncryption(String name, int length) throws KeyException {
 		if (name == null) {
 			throw new KeyException("You cannot use a null key name.");			
 		}
@@ -166,6 +166,38 @@ public class InMemoryKeyStore implements TestableKeyStore {
 			keys.remove(name);
 		}
 		
+	}
+
+	@Override
+	public int getCurrentOffset(String keyName) throws KeyException {
+		return offsets.get(keyName);
+	}
+
+	@Override
+	public int getSize(String keyName) throws KeyException {
+		throw new UnsupportedOperationException("Not Yet Implemented");
+	}
+
+	@Override
+	public byte[] getKeyBytesForDecryption(String name, int offset, int length) throws KeyException {
+		if (name == null) {
+			throw new KeyException("You cannot use a null key name.");			
+		}
+		if (!keys.containsKey(name)) {
+			throw new KeyException("The requested key does not exist in this key store: " + name);
+		}
+		byte[] key = keys.get(name);
+		int currentOffset = offset;
+		if (key.length < currentOffset + length) {
+			throw new KeyException("The key is not long enough to provide the requested bytes");			
+		}
+		byte[] result = new byte[length];
+		for (int i = 0; i < length; i++) {
+			result[i] = key[currentOffset + i];
+		}
+		//clear the data
+		clear(name, currentOffset, length);
+		return result;
 	}
 
 }
