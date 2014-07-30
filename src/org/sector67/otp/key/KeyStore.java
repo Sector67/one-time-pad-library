@@ -40,6 +40,7 @@ public interface KeyStore {
 	public void init() throws KeyException;
 	public void generateKey(String name, int length) throws KeyException;
 	public void addKey(String name, byte[] key, int offset) throws KeyException;
+	public void eraseKeyBytes(String name, int offset, int length) throws KeyException;
 	public void copyKey(String source, String destination) throws KeyException;
 	public int getCurrentOffset(String keyName) throws KeyException;
 	public int getSize(String keyName) throws KeyException;

@@ -39,7 +39,7 @@ import org.sector67.otp.utils.FileUtils;
 
 /**
  * A file-based implementation of an OTP keystore, primarily for testing
- * purposes.  Uses a properties file to store the key offsets.
+ * purposes. Uses a properties file to store the key offsets.
  * 
  * @author scott.hasse@gmail.com
  * 
@@ -51,27 +51,27 @@ public class FileKeyStore implements TestableKeyStore {
 	Random r = new SecureRandom();
 
 	private KeyEraser eraser = new MultiPassSecureRandomEraser();
-	
+
 	public FileKeyStore(String keyDirectory) {
 		this.keyDirectory = keyDirectory;
 	}
-	
+
 	@Override
 	public void init() throws KeyException {
 		File keyDir = new File(keyDirectory);
 		if (!keyDir.exists()) {
 			boolean result = keyDir.mkdirs();
 			if (result == false) {
-				throw new KeyException (
-					"The configured key directory does not exist, and could not be created: ["
-							+ keyDirectory + "]");
+				throw new KeyException(
+						"The configured key directory does not exist, and could not be created: ["
+								+ keyDirectory + "]");
 			}
 
 		}
 		if (!keyDir.isDirectory()) {
 			throw new KeyException(
 					"The configured key directory is not a directory: "
-							+ keyDirectory);			
+							+ keyDirectory);
 		}
 		File offsetFile = new File(keyDirectory + File.separator
 				+ OFFSET_FILE_NAME);
@@ -91,7 +91,8 @@ public class FileKeyStore implements TestableKeyStore {
 	 * information updates the current index of the key
 	 */
 	@Override
-	public byte[] getKeyBytesForEncryption(String name, int length) throws KeyException {
+	public byte[] getKeyBytesForEncryption(String name, int length)
+			throws KeyException {
 		if (name == null) {
 			throw new KeyException("You cannot use a null key name.");
 		}
@@ -111,7 +112,6 @@ public class FileKeyStore implements TestableKeyStore {
 			}
 			file.seek(offset);
 			file.read(key);
-			clear(name, offset, length);
 		} catch (IOException e) {
 			throw new KeyException(e);
 		}
@@ -169,11 +169,11 @@ public class FileKeyStore implements TestableKeyStore {
 	public void deleteKey(String name) throws KeyException {
 		Properties p = readOffsetFile();
 		if (p.containsKey(name)) {
-			//TODO: wipe file using the appropriate strategy
+			// TODO: wipe file using the appropriate strategy
 			FileUtils.deleteFile(keyDirectory + File.separator + name);
 			p.remove(name);
 			writeOffsetFile(p);
-		}		
+		}
 	}
 
 	@Override
@@ -183,12 +183,12 @@ public class FileKeyStore implements TestableKeyStore {
 		Set<Object> keys = p.keySet();
 		for (Iterator<Object> iterator = keys.iterator(); iterator.hasNext();) {
 			String keyName = (String) iterator.next();
-			result.add(keyName);			
+			result.add(keyName);
 		}
 		Collections.sort(result);
 		return result;
 	}
-	
+
 	@Override
 	public void generateKey(String name, int length) throws KeyException {
 		if (name == null) {
@@ -217,14 +217,13 @@ public class FileKeyStore implements TestableKeyStore {
 	 * and attempts to delete the keystore directory
 	 */
 	public void destroy() throws KeyException {
-		//TODO: make this use the KeyEraser to clear data before deleting
+		// TODO: make this use the KeyEraser to clear data before deleting
 		Properties p = readOffsetFile();
 		Set<String> names = p.stringPropertyNames();
 		for (String name : names) {
 			FileUtils.deleteFile(keyDirectory + File.separator + name);
 		}
-		FileUtils.deleteFile(keyDirectory + File.separator
-				+ OFFSET_FILE_NAME);
+		FileUtils.deleteFile(keyDirectory + File.separator + OFFSET_FILE_NAME);
 		FileUtils.deleteFile(keyDirectory);
 	}
 
@@ -253,23 +252,12 @@ public class FileKeyStore implements TestableKeyStore {
 		}
 		return props;
 	}
-	
-	private void clear(String keyName, int pos, int length) throws KeyException {
-		RandomAccessFile key;
-		try {
-			key = new RandomAccessFile(keyDirectory
-					+ File.separator + keyName, "rw");
-			KeyData kd = new FileKeyData(key);
-			eraser.erase(kd, pos, length);
-		} catch (FileNotFoundException e) {
-			throw new KeyException(e);
-		}
 
-	}
-	
+
+
 	public class FileKeyData implements KeyData {
 		private RandomAccessFile key;
-		
+
 		public FileKeyData(RandomAccessFile key) {
 			this.key = key;
 		}
@@ -288,7 +276,7 @@ public class FileKeyStore implements TestableKeyStore {
 			} catch (IOException e) {
 				throw new KeyException(e);
 			}
-			
+
 		}
 
 		public void write(byte[] data) throws KeyException {
@@ -298,21 +286,21 @@ public class FileKeyStore implements TestableKeyStore {
 				throw new KeyException(e);
 			}
 		}
-		
-	}
-	
-	private void copy(File src, File dst) throws IOException {
-	    InputStream in = new FileInputStream(src);
-	    OutputStream out = new FileOutputStream(dst);
 
-	    // Transfer bytes from in to out
-	    byte[] buf = new byte[1024];
-	    int len;
-	    while ((len = in.read(buf)) > 0) {
-	        out.write(buf, 0, len);
-	    }
-	    in.close();
-	    out.close();
+	}
+
+	private void copy(File src, File dst) throws IOException {
+		InputStream in = new FileInputStream(src);
+		OutputStream out = new FileOutputStream(dst);
+
+		// Transfer bytes from in to out
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		in.close();
+		out.close();
 	}
 
 	@Override
@@ -322,7 +310,7 @@ public class FileKeyStore implements TestableKeyStore {
 		if (p.containsKey(keyName)) {
 			String offsetString = p.getProperty(keyName);
 			try {
-				offset = Integer.parseInt(offsetString); 
+				offset = Integer.parseInt(offsetString);
 			} catch (NumberFormatException e) {
 				throw new KeyException(e);
 			}
@@ -359,11 +347,26 @@ public class FileKeyStore implements TestableKeyStore {
 			}
 			file.seek(offset);
 			file.read(key);
-			clear(name, offset, length);
 		} catch (IOException e) {
 			throw new KeyException(e);
 		}
 		return key;
+	}
+
+	public void eraseKeyBytes(String keyName, int pos, int length) throws KeyException {
+		if (keyName == null) {
+			throw new KeyException("You cannot use a null key name.");
+		}
+		RandomAccessFile key;
+		try {
+			key = new RandomAccessFile(keyDirectory + File.separator + keyName,
+					"rw");
+			KeyData kd = new FileKeyData(key);
+			eraser.erase(kd, pos, length);
+		} catch (FileNotFoundException e) {
+			throw new KeyException(e);
+		}
+
 	}
 
 }
